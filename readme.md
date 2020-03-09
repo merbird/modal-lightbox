@@ -1,4 +1,4 @@
-# Modal Popup - Lightbox Slideshow
+# Modal Lightbox - Slideshow Using jQuery
 ## Version History
 1.0 - 3/9/2020 - Initial release
 
