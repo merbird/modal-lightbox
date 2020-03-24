@@ -1,6 +1,7 @@
 # Modal Lightbox - Slideshow Using jQuery
 ## Version History
 1.0 - 3/9/2020 - Initial release
+1.1 - 3/23/2020 - Add mobile swipe navigation and stop autoplay on next/prev button click or swipe 
 
 ## Introduction
 This is a modal image lightbox popup that displays a slideshow written in jQuery, CSS and HTML. 

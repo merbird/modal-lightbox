@@ -23,6 +23,7 @@
          this.slideInterval = $(modal).attr("data-interval");
          this.slideInterval == undefined ? this.slideInterval = 5000 : this.slideInterval = parseInt(this.slideInterval) * 1000;
          this.autoplay = '';
+         this.swipeStarted = false;
 
          this.openModal = this.openModal.bind(this);
          this.closeModal = this.closeModal.bind(this);
@@ -34,6 +35,9 @@
          this.debounceresize = this.debounceresize.bind(this);
          this.resize = this.resize.bind(this);
          this.triggerSlide = this.triggerSlide.bind(this);
+         this.startSwipe = this.startSwipe.bind(this);
+         this.endSwipe = this.endSwipe.bind(this);
+         this.cancelSwipe = this.cancelSwipe.bind(this);
 
          // click on one of the modal images 
          this.$image.on('click touchstart', this.openModal);
@@ -70,11 +74,16 @@
          }
 
          // event handler to close modal 
-         $('.bodOpenModal,.bodCloseIcon').on('click touchstart', this.closeModal);
+         $('.bodCloseIcon').on('click touchstart', this.closeModal);
+
+         // handle mobile swipe
+         $('.bodOpenModal').on('touchstart', this.startSwipe);
+         $('.bodOpenModal').on('touchend', this.endSwipe);
+         $('.bodOpenModal').on('touchcancel', this.cancelSwipe);
 
          // next and previous slide events
-         $('.bodOpenModal img, .bodNextSlide').on('click touchstart', this.nextSlide);
-         $('.bodPrevSlide').on('click touchstart', this.prevSlide);
+         $('.bodNextSlide').on('click touchstart', { cancelAutoPlay: true }, this.nextSlide);
+         $('.bodPrevSlide').on('click touchstart', { cancelAutoPlay: true }, this.prevSlide);
 
          // slide nav link events 
          $('.bodNavLink').on('click touchstart', this.navLink);
@@ -83,6 +92,49 @@
          if (this.slideInterval > 0) {
             this.autoplay = setTimeout(this.triggerSlide, this.slideInterval);
          }
+      }
+
+      // handle swipe left and right on touchscreen devices
+
+      // start tracking the swipe
+      startSwipe(event) {
+         this.swipeStartX = event.changedTouches[0].pageX;
+         this.swipeStartY = event.changedTouches[0].pageY;
+         this.swipeStarted = true;
+      }
+
+      endSwipe(event) {
+         if (this.swipeStarted) {
+            // check for left or right swipe. Must swipe by at least 30px 
+            // and cannot be more than 30px up or down
+
+            // check for swipe left
+            if ((this.swipeStartX > event.changedTouches[0].pageX) &&
+               (this.swipeStartX - event.changedTouches[0].pageX > 30)) {
+
+               if (!BodModal.checkYSwipe(this.swipeStartY, event.changedTouches[0].pageY)) {
+                  if (this.autoplay) clearTimeout(this.autoplay);
+                  this.nextSlide();
+               }
+
+               // check for swipe right 
+            } else if ((this.swipeStartX < event.changedTouches[0].pageX) &&
+               (event.changedTouches[0].pageX - this.swipeStartX > 30)) {
+
+               if (!BodModal.checkYSwipe(this.swipeStartY, event.changedTouches[0].pageY)) {
+                  if (this.autoplay) clearTimeout(this.autoplay);
+                  this.prevSlide();
+               }
+
+            }
+
+         }
+         this.swipeStarted = false;
+      }
+
+      // cancel tracking the swipe
+      cancelSwipe() {
+         this.swipeStarted = false;
       }
 
       // use recursive setTimeout so create loop of slides
@@ -201,6 +253,25 @@
          return html;
       }
 
+      // Check if user swiped up or down more than 30px
+      // startY - number - starting Y position for swipe
+      // endY - number - ending Y position for swipe
+      // return - bool - true = detected swipe up or down 
+
+      static checkYSwipe(startY, endY) {
+
+         if ((startY > endY) && (startY - endY > 30)) {
+            return true;
+         }
+
+         if ((startY < endY) && (endY - startY > 30)) {
+            return true;
+         }
+
+         return false;
+
+      }
+
       // Extracts filename from full path
       // path - string - file path e.g. https://test.com/index.html
       // return - string - filename e.g. index.html
@@ -255,7 +326,9 @@
       closeModal() {
 
          // remove any events 
-         $('.bodOpenModel').off('click touchstart');
+         $('.bodOpenModal').off('touchstart');
+         $('.bodOpenModal').off('touchend');
+         $('.bodOpenModel').off('click');
          $('.bodOpenModal img, .bodNextSlide').off('click touchstart');
          $('.bodPrevSlide').off('click touchstart');
          $('.bodNavLink').off('click touchstart');
@@ -270,20 +343,28 @@
 
 
       prevSlide(evt) {
+         if (evt) {
+            if (typeof evt.data.cancelAutoPlay !== 'undefined') {
+               if (this.autoplay && evt.data.cancelAutoPlay) clearTimeout(this.autoplay);
+            }
+         }
+
          --this.activeSlide < 1 ? this.activeSlide = this.slideCount : this.activeSlide;
          this.displaySlide(this.activeSlide);
-         evt.preventDefault();
-         evt.stopPropagation();
+         if (evt) evt.stopPropagation();
       }
 
 
       nextSlide(evt) {
+         if (evt) {
+            if (typeof evt.data.cancelAutoPlay !== 'undefined') {
+               if (this.autoplay && evt.data.cancelAutoPlay) clearTimeout(this.autoplay);
+            }
+         }
+
          ++this.activeSlide > this.slideCount ? this.activeSlide = 1 : this.activeSlide;
          this.displaySlide(this.activeSlide);
-         if (evt) {
-            evt.preventDefault();
-            evt.stopPropagation();
-         }
+         if (evt) evt.stopPropagation();
       }
 
 
