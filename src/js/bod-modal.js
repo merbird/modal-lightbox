@@ -16,6 +16,7 @@
          this.activeSlide = 0;
          this.displayTitle = this.$modal.attr('data-title');
          this.timer = '';
+         this.disableClick = false;
 
 
          // data-interval contains slide auto play interval in seconds i.e. time between slides
@@ -347,6 +348,14 @@
             if (typeof evt.data.cancelAutoPlay !== 'undefined') {
                if (this.autoplay && evt.data.cancelAutoPlay) clearTimeout(this.autoplay);
             }
+
+            // Code to stop both touchstart and click events firing
+            if (this.disableClick == true && evt.type == 'click') {
+               this.disableClick = false;
+               return false;
+            } else if (evt.type == 'touchstart') {
+               this.disableClick = true;
+            }
          }
 
          --this.activeSlide < 1 ? this.activeSlide = this.slideCount : this.activeSlide;
@@ -359,6 +368,14 @@
          if (evt) {
             if (typeof evt.data.cancelAutoPlay !== 'undefined') {
                if (this.autoplay && evt.data.cancelAutoPlay) clearTimeout(this.autoplay);
+            }
+
+            // Code to stop both touchstart and click events firing
+            if (this.disableClick == true && evt.type == 'click') {
+               this.disableClick = false;
+               return false;
+            } else if (evt.type == 'touchstart') {
+               this.disableClick = true;
             }
          }
 

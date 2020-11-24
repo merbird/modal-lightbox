@@ -2,6 +2,7 @@
 ## Version History
 1.0 - 3/9/2020 - Initial release
 1.1 - 3/23/2020 - Add mobile swipe navigation and stop autoplay on next/prev button click or swipe 
+1.2 - 11/24/2020 - Stop double slide skip by not allowing both touchstart and click events to fire
 
 ## Introduction
 This is a modal image lightbox popup that displays a slideshow written in jQuery, CSS and HTML. 

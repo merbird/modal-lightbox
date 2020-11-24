@@ -23,6 +23,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
          this.activeSlide = 0;
          this.displayTitle = this.$modal.attr('data-title');
          this.timer = '';
+         this.disableClick = false;
 
          // data-interval contains slide auto play interval in seconds i.e. time between slides
          // 0 = no autoplay, undefined value defaults to 5 seconds  
@@ -347,6 +348,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                if (typeof evt.data.cancelAutoPlay !== 'undefined') {
                   if (this.autoplay && evt.data.cancelAutoPlay) clearTimeout(this.autoplay);
                }
+
+               // Code to stop both touchstart and click events firing
+               if (this.disableClick == true && evt.type == 'click') {
+                  this.disableClick = false;
+                  return false;
+               } else if (evt.type == 'touchstart') {
+                  this.disableClick = true;
+               }
             }
 
             --this.activeSlide < 1 ? this.activeSlide = this.slideCount : this.activeSlide;
@@ -359,6 +368,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             if (evt) {
                if (typeof evt.data.cancelAutoPlay !== 'undefined') {
                   if (this.autoplay && evt.data.cancelAutoPlay) clearTimeout(this.autoplay);
+               }
+
+               // Code to stop both touchstart and click events firing
+               if (this.disableClick == true && evt.type == 'click') {
+                  this.disableClick = false;
+                  return false;
+               } else if (evt.type == 'touchstart') {
+                  this.disableClick = true;
                }
             }
 
